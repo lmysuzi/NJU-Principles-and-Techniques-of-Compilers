@@ -1,0 +1,11 @@
+{
+    "files.associations": {
+        "stdio.h": "c",
+        "table.h": "c",
+        "compare": "c",
+        "type_traits": "c",
+        "syntax.tab.h": "c",
+        "tree.h": "c",
+        "stdlib.h": "c"
+    }
+}
