@@ -5,10 +5,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "data_structure.h"
+#include "dag.h"
 
 typedef struct Operand
 {
     char *name;
+
+    // 该操作数所对应的DAG节点
+    DAGnode *dag_node;
 
     enum
     {
@@ -19,5 +24,7 @@ typedef struct Operand
 } Operand;
 
 Operand *operand_create(char *text);
+
+void operand_initial();
 
 #endif

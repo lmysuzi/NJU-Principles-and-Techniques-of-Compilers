@@ -2,7 +2,6 @@ FUNCTION main :
 READ t1
 v1 := t1
 READ t2
-
 v2 := t2
 t3 := v1 + #2
 v3 := t3

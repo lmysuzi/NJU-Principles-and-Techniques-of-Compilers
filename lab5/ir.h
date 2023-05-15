@@ -76,7 +76,7 @@ typedef struct IR
         } param_ir;
         struct
         {
-
+            Operand *read_var;
         } read_ir;
         struct
         {

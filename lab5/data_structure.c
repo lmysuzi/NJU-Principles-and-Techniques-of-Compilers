@@ -26,6 +26,19 @@ ListNode *list_append(ListNode *head, ListNode *node)
     return head;
 }
 
+ListNode *list_search_by_key(ListNode *head, int (*cmp)(ListNode *, void *), void *key)
+{
+    assert(head != NULL);
+    ListNode *cur = head->next;
+    while (cur != head)
+    {
+        if (cmp(cur, key))
+            return cur;
+        cur = cur->next;
+    }
+    return NULL;
+}
+
 void string_split(char *src, const char *separator, char **dest, int *num)
 {
     char *pNext;

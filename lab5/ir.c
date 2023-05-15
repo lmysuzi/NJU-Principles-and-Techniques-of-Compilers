@@ -6,6 +6,10 @@ ListNode *ir_extract(FILE *file, ListNode *head)
 
     while (fgets(buf, sizeof(buf), file) != NULL)
     {
+        if (buf[strlen(buf) - 1] == '\n')
+        {
+            buf[strlen(buf) - 1] = '\0';
+        }
         char *params[6];
         int param_count;
         string_split(buf, " ", params, &param_count);
@@ -69,6 +73,7 @@ ListNode *ir_extract(FILE *file, ListNode *head)
         else if (strcmp(params[0], "READ") == 0)
         {
             ir->type = READ_IR;
+            ir->read_ir.read_var = operand_create(params[1]);
         }
         else if (strcmp(params[0], "WRITE") == 0)
         {
