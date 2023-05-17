@@ -4,6 +4,20 @@
 #include "operand.h"
 #include "data_structure.h"
 
+struct CFGnode;
+
+typedef struct Exp
+{
+    Operand *left, *right;
+    enum
+    {
+        ADD = 1,
+        SUB,
+        MUL,
+        DIV
+    } type;
+} Exp;
+
 typedef struct IR
 {
     // 该IR是否是BB的leader
@@ -26,11 +40,14 @@ typedef struct IR
         WRITE_IR,
     } type;
 
+    struct CFGnode *cfg_node;
+
     union
     {
         struct
         {
             char *label_name;
+
         } label_ir;
         struct
         {
@@ -42,6 +59,7 @@ typedef struct IR
         } assign_ir;
         struct
         {
+            Exp *exp;
             Operand *left, *right1, *right2;
         } binary_ir;
         struct
@@ -85,6 +103,12 @@ typedef struct IR
     };
 } IR;
 
-ListNode *ir_extract(FILE *file, ListNode *head);
+void ir_extract(FILE *file);
+
+void ir_init();
+
+extern ListNode *label_list_head;
+
+extern ListNode *func_list_head;
 
 #endif

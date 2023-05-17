@@ -33,6 +33,13 @@ void dag_build_assign_ir(DAG *dag, IR *ir)
         ListNode *rightnode = listnode_create(right);
         right->dag_node->attached_vars = list_append(right->dag_node->attached_vars, rightnode);
     }
+
+    left->dag_node = dag_node_create();
+    ListNode *leftnode = listnode_create(left);
+    left->dag_node->attached_vars = list_append(left->dag_node->attached_vars, leftnode);
+
+    left->dag_node->source_node1 = right->dag_node;
+    right->dag_node->target_node = left->dag_node;
 }
 
 void dag_build(ListNode *ir_list)
@@ -49,7 +56,7 @@ void dag_build(ListNode *ir_list)
         switch (ir->type)
         {
         case ASSIGN_IR:
-
+            dag_build_assign_ir(dag, ir);
             break;
 
         default:

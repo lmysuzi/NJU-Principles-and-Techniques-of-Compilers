@@ -16,6 +16,7 @@ ListNode *list_create()
     return head;
 }
 
+// append by ListNode
 ListNode *list_append(ListNode *head, ListNode *node)
 {
     assert(head != NULL && node != NULL);
@@ -23,6 +24,14 @@ ListNode *list_append(ListNode *head, ListNode *node)
     node->prev = head->prev;
     head->prev->next = node;
     head->prev = node;
+    return head;
+}
+
+ListNode *list_append_by_data(ListNode *head, void *data)
+{
+    assert(head != NULL);
+    ListNode *node = listnode_create(data);
+    head = list_append(head, node);
     return head;
 }
 

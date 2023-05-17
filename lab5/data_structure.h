@@ -26,6 +26,9 @@ ListNode *list_merge(ListNode *node);
 // 通过特定的值来查找结点
 ListNode *list_search_by_key(ListNode *head, int (*cmp)(ListNode *, void *), void *key);
 
+// 通过data添加节点
+ListNode *list_append_by_data(ListNode *head, void *data);
+
 // 字符串
 // 字符串裁剪
 void string_split(char *src, const char *separator, char **dest, int *num);

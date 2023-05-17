@@ -6,14 +6,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include "data_structure.h"
-#include "dag.h"
+// #include "dag.h"
 
 typedef struct Operand
 {
     char *name;
-
+    int val;
+    // 当前变量关联的表达式
+    ListNode *attached_exp;
     // 该操作数所对应的DAG节点
-    DAGnode *dag_node;
+    // DAGnode *dag_node;
 
     enum
     {

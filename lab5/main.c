@@ -2,13 +2,16 @@
 #include "ir.h"
 #include "bb.h"
 #include "operand.h"
+#include "cfg.h"
 
 FILE *input_file = NULL;
 
-void initial()
+void init()
 {
     operand_initial();
     BB_initial();
+    ir_init();
+    cfg_init();
 }
 
 int main(int argc, char *argv[])
@@ -20,9 +23,10 @@ int main(int argc, char *argv[])
             perror(argv[1]);
             return 1;
         }
-        initial();
-        ListNode *ir_list = list_create();
-        ir_list = ir_extract(input_file, ir_list);
-        build_BBs(ir_list);
+        init();
+        ir_extract(input_file);
+        cfgs_build();
+
+        // build_BBs(ir_list);
     }
 }
