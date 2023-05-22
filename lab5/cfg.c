@@ -11,8 +11,8 @@ static CFGnode *cfg_node_create(int type, IR *ir)
 {
     CFGnode *cfgnode = (CFGnode *)malloc(sizeof(CFGnode));
     cfgnode->type = type;
-    cfgnode->in_fact = list_create();
-    cfgnode->out_fact = list_create();
+    cfgnode->in_fact = NULL;
+    cfgnode->out_fact = NULL;
     cfgnode->predecessors = list_create();
     cfgnode->successors = list_create();
     cfgnode->stmt = ir;
@@ -24,6 +24,7 @@ static CFG *cfg_create()
     CFG *cfg = (CFG *)malloc(sizeof(CFG));
     cfg->entry_node = cfg_node_create(ENTRY, NULL);
     cfg->exit_node = cfg_node_create(EXIT, NULL);
+    cfg->cfgnode_list = list_create();
     return cfg;
 }
 
@@ -47,6 +48,7 @@ static CFGnode *search_label(char *name)
     assert(0);
     return NULL;
 }
+
 // 建立cfg图
 static CFG *cfg_build(ListNode *ir_list)
 {
@@ -59,6 +61,7 @@ static CFG *cfg_build(ListNode *ir_list)
         IR *ir = (IR *)cur->data;
 
         CFGnode *cur_cfg_node = cfg_node_create(NORMAL, ir);
+        cfg->cfgnode_list = list_append_by_data(cfg->cfgnode_list, cur_cfg_node);
         ir->cfg_node = cur_cfg_node;
 
         if (last_cfg_node != NULL)
@@ -103,5 +106,18 @@ void cfgs_build()
         ListNode *single_func = (ListNode *)cur->data;
         CFG *cfg = cfg_build(single_func);
         cfgs_list_head = list_append_by_data(cfgs_list_head, cfg);
+    }
+}
+
+void cfgs_output(FILE *file)
+{
+    for (ListNode *cur_cfg = cfgs_list_head->next; cur_cfg != cfgs_list_head; cur_cfg = cur_cfg->next)
+    {
+        CFG *cfg = (CFG *)cur_cfg->data;
+        for (ListNode *cur = cfg->cfgnode_list->next; cur != cfg->cfgnode_list; cur = cur->next)
+        {
+            CFGnode *cfgnode = (CFGnode *)cur->data;
+            fprintf_ir(file, cfgnode->stmt);
+        }
     }
 }

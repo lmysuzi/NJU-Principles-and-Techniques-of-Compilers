@@ -3,8 +3,10 @@
 #include "bb.h"
 #include "operand.h"
 #include "cfg.h"
+#include "avilable_expressions_analysis.h"
 
 FILE *input_file = NULL;
+FILE *output_file = NULL;
 
 void init()
 {
@@ -23,10 +25,18 @@ int main(int argc, char *argv[])
             perror(argv[1]);
             return 1;
         }
+        if (!(output_file = fopen(argv[2], "w")))
+        {
+            perror(argv[2]);
+            return 1;
+        }
         init();
         ir_extract(input_file);
         cfgs_build();
-
+        avilable_expressions_analysis();
+        cfgs_output(output_file);
+        fclose(output_file);
+        fclose(input_file);
         // build_BBs(ir_list);
     }
 }

@@ -22,11 +22,17 @@ typedef struct Operand
         // 常数
         IMMEDIATE_OP = 1,
         VAR_OP,
+        // exp表示该变量代表一个表达式，用于消除公共表达式
+        EXP,
     } type;
 } Operand;
 
 Operand *operand_create(char *text);
 
 void operand_initial();
+
+void sprintf_op(char *addr, Operand *op);
+
+Operand *operand_exp_create();
 
 #endif

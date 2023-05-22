@@ -11,8 +11,8 @@ typedef struct CFGnode
     ListNode *successors;
     ListNode *predecessors;
     // data :fact
-    ListNode *in_fact;
-    ListNode *out_fact;
+    Set *in_fact;
+    Set *out_fact;
 
     enum
     {
@@ -26,10 +26,16 @@ typedef struct CFG
 {
     CFGnode *entry_node;
     CFGnode *exit_node;
+    // entry 和 exit 不在list当中
+    ListNode *cfgnode_list;
 } CFG;
 
 void cfg_init();
 
 void cfgs_build();
+
+void cfgs_output(FILE *file);
+
+extern ListNode *cfgs_list_head;
 
 #endif

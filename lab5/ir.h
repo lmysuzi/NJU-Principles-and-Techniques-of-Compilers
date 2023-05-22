@@ -61,6 +61,7 @@ typedef struct IR
         {
             Exp *exp;
             Operand *left, *right1, *right2;
+            Operand *exp_var;
         } binary_ir;
         struct
         {
@@ -70,6 +71,7 @@ typedef struct IR
         {
             Operand *left, *right;
             char *label_name;
+            char *relop;
         } conditional_goto_ir;
         struct
         {
@@ -77,7 +79,8 @@ typedef struct IR
         } return_ir;
         struct
         {
-
+            Operand *var;
+            int size;
         } dec_ir;
         struct
         {
@@ -107,8 +110,14 @@ void ir_extract(FILE *file);
 
 void ir_init();
 
+IR *ir_create(int type);
+
+void fprintf_ir(FILE *file, IR *ir);
+
 extern ListNode *label_list_head;
 
 extern ListNode *func_list_head;
+
+extern ListNode *exp_list_head;
 
 #endif

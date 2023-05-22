@@ -11,6 +11,15 @@ void operand_initial()
     imm_list = list_create();
 }
 
+void sprintf_op(char *addr, Operand *op)
+{
+    assert(op != NULL);
+    if (op->type == IMMEDIATE_OP)
+        sprintf(addr, "#%d", op->val);
+    else
+        sprintf(addr, "%s", op->name);
+}
+
 static int operand_listnode_cmp(ListNode *listnode, void *key)
 {
     assert(listnode != NULL);
@@ -73,5 +82,18 @@ Operand *operand_create(char *text)
             op = (Operand *)node->data;
         }
     }
+    return op;
+}
+
+Operand *operand_exp_create()
+{
+    static int id = 1;
+    Operand *op = (Operand *)malloc(sizeof(Operand));
+    op->attached_exp = NULL;
+    op->name = malloc(10);
+    sprintf(op->name, "exp_%d", id);
+    id++;
+    op->type = EXP;
+    op->val = 0;
     return op;
 }

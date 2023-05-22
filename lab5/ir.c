@@ -1,7 +1,7 @@
 #include "ir.h"
 
 // 所有表达式的集合
-static ListNode *exp_list_head;
+ListNode *exp_list_head;
 // 所有IR的集合
 ListNode *ir_list_head;
 // 所有label的集合
@@ -16,6 +16,42 @@ void ir_init()
     ir_list_head = list_create();
     label_list_head = list_create();
     func_list_head = list_create();
+}
+
+IR *ir_create(int type)
+{
+    IR *ir = (IR *)malloc(sizeof(IR));
+    assert(ir != NULL);
+    ir->type = type;
+    return ir;
+}
+
+static void sprintf_exp(char *addr, Exp *exp)
+{
+    char right1[16];
+    char right2[16];
+    char op;
+    switch (exp->type)
+    {
+    case ADD:
+        op = '+';
+        break;
+    case SUB:
+        op = '-';
+        break;
+    case MUL:
+        op = '*';
+        break;
+    case DIV:
+        op = '/';
+        break;
+    default:
+        assert(0);
+        break;
+    }
+    sprintf_op(right1, exp->left);
+    sprintf_op(right2, exp->right);
+    sprintf(addr, "%s %c %s", right1, op, right2);
 }
 
 // 判断当前表达式是否已存在
@@ -134,6 +170,8 @@ void ir_extract(FILE *file)
             ir->type = CONDITIONAL_GOTO_IR;
             ir->conditional_goto_ir.label_name = (char *)malloc(strlen(params[5]) + 1);
             strcpy(ir->conditional_goto_ir.label_name, params[5]);
+            ir->conditional_goto_ir.relop = (char *)malloc(strlen(params[2] + 1));
+            strcpy(ir->conditional_goto_ir.relop, params[2]);
             ir->conditional_goto_ir.left = operand_create(params[1]);
             ir->conditional_goto_ir.right = operand_create(params[3]);
         }
@@ -145,6 +183,8 @@ void ir_extract(FILE *file)
         else if (strcmp(params[0], "DEC") == 0)
         {
             ir->type = DEC_IR;
+            ir->dec_ir.var = operand_create(params[1]);
+            sscanf(params[2], "%d", &(ir->dec_ir.size));
         }
         else if (strcmp(params[0], "ARG") == 0)
         {
@@ -180,6 +220,7 @@ void ir_extract(FILE *file)
             ir->binary_ir.right1 = operand_create(params[2]);
             ir->binary_ir.right2 = operand_create(params[4]);
             ir->binary_ir.exp = exp_create(params[3], ir->binary_ir.right1, ir->binary_ir.right2);
+            ir->binary_ir.exp_var = NULL;
         }
         else if (param_count == 3)
         {
@@ -190,5 +231,82 @@ void ir_extract(FILE *file)
 
         ListNode *ir_node = listnode_create(ir);
         head = list_append(head, ir_node);
+    }
+}
+
+void fprintf_ir(FILE *file, IR *ir)
+{
+    assert(ir != NULL);
+
+    char left[16];
+    char right[16];
+    char exp[64];
+    char op[16];
+
+    switch (ir->type)
+    {
+    case LABEL_IR:
+        fprintf(file, "LABEL %s :\n", ir->label_ir.label_name);
+        break;
+    case FUNC_IR:
+        printf("name %s\n", ir->func_ir.func_name);
+        fprintf(file, "FUNCTION %s :\n", ir->func_ir.func_name);
+        break;
+    case ASSIGN_IR:
+        sprintf_op(left, ir->assign_ir.left);
+        sprintf_op(right, ir->assign_ir.right);
+        fprintf(file, "%s := %s\n", left, right);
+        break;
+    case BINARY_IR:
+        sprintf_op(left, ir->binary_ir.left);
+        sprintf_exp(exp, ir->binary_ir.exp);
+        if (ir->binary_ir.exp_var != NULL)
+        {
+            sprintf_op(op, ir->binary_ir.exp_var);
+            fprintf(file, "%s := %s\n", op, exp);
+            fprintf(file, "%s := %s\n", left, op);
+        }
+        else
+            fprintf(file, "%s := %s\n", left, exp);
+        break;
+    case GOTO_IR:
+        fprintf(file, "GOTO %s\n", ir->goto_ir.label_name);
+        break;
+    case CONDITIONAL_GOTO_IR:
+        sprintf_op(left, ir->conditional_goto_ir.left);
+        sprintf_op(right, ir->conditional_goto_ir.right);
+        fprintf(file, "IF %s %s %s GOTO %s\n", left, ir->conditional_goto_ir.relop, right, ir->conditional_goto_ir.label_name);
+        break;
+    case RETURN_IR:
+        sprintf_op(op, ir->return_ir.return_var);
+        fprintf(file, "RETURN %s\n", op);
+        break;
+    case DEC_IR:
+        sprintf_op(op, ir->dec_ir.var);
+        fprintf(file, "DEC %s %d\n", op, ir->dec_ir.size);
+        break;
+    case ARG_IR:
+        sprintf_op(op, ir->arg_ir.arg_var);
+        fprintf(file, "ARG %s\n", op);
+        break;
+    case CALL_IR:
+        sprintf_op(op, ir->call_ir.left);
+        fprintf(file, "%s := CALL %s\n", op, ir->call_ir.func_name);
+        break;
+    case PARAM_IR:
+        sprintf_op(op, ir->param_ir.param_var);
+        fprintf(file, "PARAM %s\n", op);
+        break;
+    case READ_IR:
+        sprintf_op(op, ir->read_ir.read_var);
+        fprintf(file, "READ %s\n", op);
+        break;
+    case WRITE_IR:
+        sprintf_op(op, ir->write_ir.write_var);
+        fprintf(file, "WRITE %s\n", op);
+        break;
+    default:
+        assert(0);
+        break;
     }
 }
