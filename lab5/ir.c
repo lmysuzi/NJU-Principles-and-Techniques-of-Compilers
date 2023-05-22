@@ -100,11 +100,13 @@ static Exp *exp_create(char *text, Operand *left, Operand *right)
     Exp *exp = is_exp_exist(type, left, right);
     if (exp == NULL)
     {
+        static int exp_id = 1;
         exp = (Exp *)malloc(sizeof(Exp));
         assert(exp != NULL);
         exp->left = left;
         exp->right = right;
         exp->type = type;
+        exp->exp_var = operand_exp_create();
 
         if (left->type == VAR_OP)
         {
@@ -130,6 +132,7 @@ void ir_extract(FILE *file)
 
     while (fgets(buf, sizeof(buf), file) != NULL)
     {
+        static int index = 1;
         if (buf[strlen(buf) - 1] == '\n')
         {
             buf[strlen(buf) - 1] = '\0';
@@ -141,7 +144,8 @@ void ir_extract(FILE *file)
         IR *ir = (IR *)malloc(sizeof(IR));
         ir->is_leader = 0;
         ir->cfg_node = NULL;
-        assert(ir != NULL);
+        ir->index = index;
+        index++;
 
         if (strcmp(params[0], "FUNCTION") == 0)
         {
@@ -170,7 +174,7 @@ void ir_extract(FILE *file)
             ir->type = CONDITIONAL_GOTO_IR;
             ir->conditional_goto_ir.label_name = (char *)malloc(strlen(params[5]) + 1);
             strcpy(ir->conditional_goto_ir.label_name, params[5]);
-            ir->conditional_goto_ir.relop = (char *)malloc(strlen(params[2] + 1));
+            ir->conditional_goto_ir.relop = (char *)malloc(strlen(params[2]) + 1);
             strcpy(ir->conditional_goto_ir.relop, params[2]);
             ir->conditional_goto_ir.left = operand_create(params[1]);
             ir->conditional_goto_ir.right = operand_create(params[3]);

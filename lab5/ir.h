@@ -9,6 +9,8 @@ struct CFGnode;
 typedef struct Exp
 {
     Operand *left, *right;
+    // 用于表示该exp的变量
+    Operand *exp_var;
     enum
     {
         ADD = 1,
@@ -22,6 +24,9 @@ typedef struct IR
 {
     // 该IR是否是BB的leader
     int is_leader;
+
+    // index 用于debug
+    int index;
 
     enum
     {

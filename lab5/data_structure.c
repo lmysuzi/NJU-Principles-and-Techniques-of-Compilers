@@ -218,7 +218,8 @@ int set_equal(Set *a, Set *b)
 
 Set *set_teardown(Set *set)
 {
-    assert(set != NULL);
+    if (set == NULL)
+        return NULL;
     set->head = list_teardown(set->head);
     free(set);
     return NULL;

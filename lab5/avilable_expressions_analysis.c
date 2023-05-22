@@ -1,6 +1,10 @@
 #include "avilable_expressions_analysis.h"
 
-static ExpFact *exp_fact_create(Exp *exp, Operand *op)
+static void print_cfg_fact(CFG *cfg);
+
+static void print_fact(CFGnode *cfgnode);
+
+/*static ExpFact *exp_fact_create(Exp *exp, Operand *op)
 {
     assert(exp != NULL);
     ExpFact *expfact = (ExpFact *)malloc(sizeof(ExpFact));
@@ -8,22 +12,12 @@ static ExpFact *exp_fact_create(Exp *exp, Operand *op)
     expfact->exp = exp;
     expfact->op = op;
     return expfact;
-}
+}*/
 
-static int exp_fact_equal(void *a, void *b)
+static int exp_equal(void *a, void *b)
 {
     assert(a != NULL && b != NULL);
     if (a == b)
-        return 1;
-
-    ExpFact *ea = (ExpFact *)a;
-    ExpFact *eb = (ExpFact *)b;
-
-    if (ea->exp != eb->exp)
-        return 0;
-    if (ea->op == NULL || eb->op == NULL)
-        return 1;
-    if (ea->op == eb->op)
         return 1;
     return 0;
 }
@@ -38,8 +32,7 @@ static void init(CFG *cfg)
     for (ListNode *cur_exp = exp_list_head->next; cur_exp != exp_list_head; cur_exp = cur_exp->next)
     {
         Exp *exp = (Exp *)cur_exp->data;
-        ExpFact *fact = exp_fact_create(exp, NULL);
-        cfgnode->out_fact = set_add(cfgnode->out_fact, fact);
+        cfgnode->out_fact = set_add(cfgnode->out_fact, exp);
     }
     Set *standard_outfact = cfgnode->out_fact;
     cur = cur->next;
@@ -71,14 +64,13 @@ static int transfer_node(CFGnode *cfgnode)
     while (pre_node != cfgnode->predecessors)
     {
         pre = (CFGnode *)pre_node->data;
-        Set *newfact = set_intersect(infact, pre->out_fact, exp_fact_equal);
+        Set *newfact = set_intersect(infact, pre->out_fact, exp_equal);
         infact = set_teardown(infact);
         infact = newfact;
         pre_node = pre_node->next;
     }
 
     IR *stmt = cfgnode->stmt;
-    printf("stmt %d\n", stmt->type);
     Set *outfact = set_copy(infact);
     Operand *left_var = NULL;
     if (stmt->type == ASSIGN_IR)
@@ -94,28 +86,23 @@ static int transfer_node(CFGnode *cfgnode)
         for (ListNode *exp_node = left_var->attached_exp->next; exp_node != left_var->attached_exp; exp_node = exp_node->next)
         {
             Exp *exp = (Exp *)exp_node->data;
-            ExpFact kill;
-            kill.exp = exp;
-            kill.op = NULL;
-            outfact = set_sub_data(outfact, &kill, exp_fact_equal);
+            outfact = set_sub_data(outfact, exp, exp_equal);
         }
 
     // 处理带表达式的语句
     if (stmt->type == BINARY_IR)
     {
-        ExpFact *gen = exp_fact_create(stmt->binary_ir.exp, NULL);
-        if (set_contains(outfact, gen, exp_fact_equal) != NULL)
+        Exp *exp = stmt->binary_ir.exp;
+        if (set_contains(outfact, exp, exp_equal) != NULL)
         {
-            free(gen);
         }
         else
         {
             // 从 a := b op c 变成
             // exp1 := b op c
             // a := exp1
-            gen->op = operand_exp_create();
-            outfact = set_add(outfact, gen);
-            cfgnode->stmt->binary_ir.exp_var = gen->op;
+            outfact = set_add(outfact, exp);
+            cfgnode->stmt->binary_ir.exp_var = exp->exp_var;
         }
     }
 
@@ -124,7 +111,8 @@ static int transfer_node(CFGnode *cfgnode)
     cfgnode->in_fact = infact;
     cfgnode->out_fact = set_teardown(cfgnode->out_fact);
     cfgnode->out_fact = outfact;
-    printf("end_transfer with %d\n", changed);
+    print_fact(cfgnode);
+    printf("exit with %d\n", changed);
     return changed;
 }
 
@@ -132,16 +120,29 @@ static void solver(CFG *cfg)
 {
     Queue *worklist = queue_create();
 
+    // 将除exit以外的所有结点加入队列
     queue_push(worklist, cfg->entry_node);
+
+    for (ListNode *cur = cfg->cfgnode_list->next; cur != cfg->cfgnode_list; cur = cur->next)
+    {
+        CFGnode *cfgnode = (CFGnode *)cur->data;
+        queue_push(worklist, cfgnode);
+    }
 
     while (!queue_empty(worklist))
     {
         CFGnode *cfgnode = (CFGnode *)queue_pop(worklist);
+
         if (transfer_node(cfgnode))
         {
+
             for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
             {
                 CFGnode *succ_cfgnode = (CFGnode *)succ->data;
+                if (cfgnode->type == NORMAL && cfgnode->stmt->type == CONDITIONAL_GOTO_IR)
+                {
+                    printf("fuck\n");
+                }
                 if (!queue_contains(worklist, succ_cfgnode))
                 {
                     queue_push(worklist, succ_cfgnode);
@@ -149,27 +150,28 @@ static void solver(CFG *cfg)
             }
         }
     }
+
+    queue_teardown(worklist);
 }
 
 static void print_fact(CFGnode *cfgnode)
 {
-    static int index = 1;
+
     Set *infact = cfgnode->in_fact;
-    printf("%d in: ", index);
+    printf("%d in: ", cfgnode->stmt->index);
     for (ListNode *cur = infact->head->next; cur != infact->head; cur = cur->next)
     {
-        ExpFact *expfact = (ExpFact *)cur->data;
-        printf("exp %s %d %s ", expfact->exp->left->name, expfact->exp->type, expfact->exp->right->name);
+        Exp *exp = (Exp *)cur->data;
+        printf("exp %s %d %s ", exp->left->name, exp->type, exp->right->name);
     }
-    printf("\n%d out: ", index);
+    printf("\n%d out: ", cfgnode->stmt->index);
     Set *outfact = cfgnode->out_fact;
     for (ListNode *cur = outfact->head->next; cur != outfact->head; cur = cur->next)
     {
-        ExpFact *expfact = (ExpFact *)cur->data;
-        printf("exp %s %d %s ", expfact->exp->left->name, expfact->exp->type, expfact->exp->right->name);
+        Exp *exp = (Exp *)cur->data;
+        printf("exp %s %d %s ", exp->left->name, exp->type, exp->right->name);
     }
     printf("\n");
-    index++;
 }
 
 static void print_cfg_fact(CFG *cfg)
@@ -191,18 +193,14 @@ static ListNode *common_subexpression_elimination(CFG *cfg)
         if (cfgnode->stmt->type == BINARY_IR)
         {
 
-            ExpFact expression;
-            expression.exp = cfgnode->stmt->binary_ir.exp;
-            expression.op = NULL;
-            ExpFact *search = NULL;
-            search = set_contains(cfgnode->in_fact, &expression, exp_fact_equal);
+            Exp *search = NULL;
+            search = set_contains(cfgnode->in_fact, cfgnode->stmt->binary_ir.exp, exp_equal);
             if (search != NULL)
             {
                 // 若该语句的infact中含有其对应的表达式，说明该表达式为公共表达式，可以进行替换
-                assert(search->op != NULL);
                 IR *new_stmt = ir_create(ASSIGN_IR);
                 new_stmt->assign_ir.left = cfgnode->stmt->binary_ir.left;
-                new_stmt->assign_ir.right = search->op;
+                new_stmt->assign_ir.right = search->exp_var;
                 new_stmt->cfg_node = cfgnode;
                 free(cfgnode->stmt);
                 cfgnode->stmt = new_stmt;
@@ -231,6 +229,20 @@ static ListNode *common_subexpression_elimination(CFG *cfg)
     return ir_list;
 }
 
+static void fact_teardown(CFG *cfg)
+{
+    cfg->entry_node->in_fact = set_teardown(cfg->entry_node->in_fact);
+    cfg->entry_node->out_fact = set_teardown(cfg->entry_node->out_fact);
+    cfg->exit_node->in_fact = set_teardown(cfg->exit_node->in_fact);
+    cfg->exit_node->out_fact = set_teardown(cfg->exit_node->out_fact);
+    for (ListNode *cur = cfg->cfgnode_list->next; cur != cfg->cfgnode_list; cur = cur->next)
+    {
+        CFGnode *cfgnode = (CFGnode *)cur->data;
+        cfgnode->in_fact = set_teardown(cfgnode->in_fact);
+        cfgnode->out_fact = set_teardown(cfgnode->out_fact);
+    }
+}
+
 void avilable_expressions_analysis()
 {
     for (ListNode *cfg_node = cfgs_list_head->next; cfg_node != cfgs_list_head; cfg_node = cfg_node->next)
@@ -238,7 +250,8 @@ void avilable_expressions_analysis()
         CFG *cfg = (CFG *)cfg_node->data;
         init(cfg);
         solver(cfg);
-        print_cfg_fact(cfg);
+        // print_cfg_fact(cfg);
         common_subexpression_elimination(cfg);
+        fact_teardown(cfg);
     }
 }
