@@ -4,6 +4,8 @@
 #include "operand.h"
 #include "cfg.h"
 #include "avilable_expressions_analysis.h"
+#include "live_variable_analysis.h"
+#include "constant_propagation.h"
 
 FILE *input_file = NULL;
 FILE *output_file = NULL;
@@ -33,7 +35,9 @@ int main(int argc, char *argv[])
         init();
         ir_extract(input_file);
         cfgs_build();
-        avilable_expressions_analysis();
+        // avilable_expressions_analysis();
+        // live_variable_analysis();
+        constant_propagation_analysis();
         cfgs_output(output_file);
         fclose(output_file);
         fclose(input_file);

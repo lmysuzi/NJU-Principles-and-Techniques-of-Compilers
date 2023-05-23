@@ -22,7 +22,7 @@ static int exp_equal(void *a, void *b)
     return 0;
 }
 
-static void init(CFG *cfg)
+static void init(const CFG *cfg)
 {
     ListNode *cur = cfg->cfgnode_list->next;
     assert(cur != cfg->cfgnode_list);
@@ -139,10 +139,6 @@ static void solver(CFG *cfg)
             for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
             {
                 CFGnode *succ_cfgnode = (CFGnode *)succ->data;
-                if (cfgnode->type == NORMAL && cfgnode->stmt->type == CONDITIONAL_GOTO_IR)
-                {
-                    printf("fuck\n");
-                }
                 if (!queue_contains(worklist, succ_cfgnode))
                 {
                     queue_push(worklist, succ_cfgnode);

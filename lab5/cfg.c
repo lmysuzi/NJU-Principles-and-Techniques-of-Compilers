@@ -16,6 +16,7 @@ static CFGnode *cfg_node_create(int type, IR *ir)
     cfgnode->predecessors = list_create();
     cfgnode->successors = list_create();
     cfgnode->stmt = ir;
+    cfgnode->dead = 0;
     return cfgnode;
 }
 
@@ -117,7 +118,8 @@ void cfgs_output(FILE *file)
         for (ListNode *cur = cfg->cfgnode_list->next; cur != cfg->cfgnode_list; cur = cur->next)
         {
             CFGnode *cfgnode = (CFGnode *)cur->data;
-            fprintf_ir(file, cfgnode->stmt);
+            if (cfgnode->dead == 0)
+                fprintf_ir(file, cfgnode->stmt);
         }
     }
 }

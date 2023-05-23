@@ -253,7 +253,6 @@ void fprintf_ir(FILE *file, IR *ir)
         fprintf(file, "LABEL %s :\n", ir->label_ir.label_name);
         break;
     case FUNC_IR:
-        printf("name %s\n", ir->func_ir.func_name);
         fprintf(file, "FUNCTION %s :\n", ir->func_ir.func_name);
         break;
     case ASSIGN_IR:

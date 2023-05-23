@@ -14,6 +14,9 @@ typedef struct CFGnode
     Set *in_fact;
     Set *out_fact;
 
+    // 判断该节点是不是死代码
+    int dead;
+
     enum
     {
         NORMAL,
