@@ -240,6 +240,23 @@ static Value evaluate_binary(IR *stmt, Set *infact)
     return ans;
 }
 
+static int set_fact_equal(void *a, void *b)
+{
+    if (a == b)
+        return 1;
+    CPFact *ac = (CPFact *)a;
+    CPFact *bc = (CPFact *)b;
+    if (ac->op != bc->op)
+        return 0;
+    if (ac->val.type != bc->val.type)
+        return 0;
+    if (ac->val.type != CONSTANT)
+        return 1;
+    if (ac->val.val != bc->val.val)
+        return 0;
+    return 1;
+}
+
 static int transfer_node(CFGnode *cfgnode)
 {
     if (cfgnode->type == EXIT)
@@ -319,14 +336,12 @@ static int transfer_node(CFGnode *cfgnode)
             }
         }
     }
-
     // 处理结果
-    int changed = set_equal(infact, cfgnode->in_fact) == 1 ? 0 : 1;
+    int changed = set_equal_by_cmp(outfact, cfgnode->out_fact, set_fact_equal) == 1 ? 0 : 1;
     cfgnode->out_fact = set_teardown(cfgnode->out_fact);
     cfgnode->out_fact = outfact;
     cfgnode->in_fact = set_teardown(cfgnode->in_fact);
     cfgnode->in_fact = infact;
-
     return changed;
 }
 
@@ -346,10 +361,8 @@ static void solver(CFG *cfg)
     while (!queue_empty(worklist))
     {
         CFGnode *cfgnode = (CFGnode *)queue_pop(worklist);
-
         if (transfer_node(cfgnode))
         {
-
             for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
             {
                 CFGnode *succ_cfgnode = (CFGnode *)succ->data;
@@ -449,7 +462,6 @@ static void constant_folding(CFG *cfg)
                 CPFact *search = set_contains(outfact, &temp, cpfact_equal);
                 if (search != NULL && search->val.type == CONSTANT)
                 {
-                    printf("fuckkkk %d\n", stmt->index);
                     stmt->binary_ir.right2 = operand_imm_create(search->val.val);
                     flag = 1;
                 }
@@ -552,16 +564,15 @@ static void dead_code_elimination(CFG *cfg)
             continue;
         cfgnode->visited = 1;
         IR *stmt = cfgnode->stmt;
-        if (cfgnode->type != NORMAL || stmt->type != CONDITIONAL_GOTO_IR)
+
+        for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
         {
-            for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
-            {
-                CFGnode *succ_cfgnode = (CFGnode *)succ->data;
-                if (succ_cfgnode->visited == 0)
-                    queue_push(worklist, succ_cfgnode);
-            }
+            CFGnode *succ_cfgnode = (CFGnode *)succ->data;
+            if (succ_cfgnode->visited == 0)
+                queue_push(worklist, succ_cfgnode);
         }
-        else
+
+        /*else
         {
             Set *outfact = cfgnode->out_fact;
             IR *stmt = cfgnode->stmt;
@@ -594,6 +605,7 @@ static void dead_code_elimination(CFG *cfg)
                 }
             }
         }
+        */
     }
 
     queue_teardown(worklist);

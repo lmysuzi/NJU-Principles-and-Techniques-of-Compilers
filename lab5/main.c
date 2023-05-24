@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
         init();
         ir_extract(input_file);
         cfgs_build();
+
         constant_propagation_analysis();
         live_variable_analysis();
         avilable_expressions_analysis();
@@ -43,5 +44,4 @@ int main(int argc, char *argv[])
         fclose(input_file);
         // build_BBs(ir_list);
     }
-    printf("你想成为rapstar吗？？？");
 }

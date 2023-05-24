@@ -59,6 +59,8 @@ Set *set_sub_data(Set *set, void *data, int (*cmp)(void *, void *));
 // 集合是否相等
 int set_equal(Set *a, Set *b);
 
+int set_equal_by_cmp(Set *a, Set *b, int (*cmp)(void *, void *));
+
 // 集合是否存在元素
 // 存在，则返回相应的data
 void *set_contains(Set *set, void *data, int (*cmp)(void *, void *));

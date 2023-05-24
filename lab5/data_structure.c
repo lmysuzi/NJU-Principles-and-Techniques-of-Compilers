@@ -216,6 +216,47 @@ int set_equal(Set *a, Set *b)
     return 1;
 }
 
+int set_equal_by_cmp(Set *a, Set *b, int (*cmp)(void *, void *))
+{
+    ListNode *cur = a->head->next;
+    while (cur != a->head)
+    {
+        ListNode *search = b->head->next;
+        int found = 0;
+        while (search != b->head)
+        {
+            if (cmp(search->data, cur->data))
+            {
+                found = 1;
+                break;
+            }
+            search = search->next;
+        }
+        if (!found)
+            return 0;
+        cur = cur->next;
+    }
+    cur = b->head->next;
+    while (cur != b->head)
+    {
+        ListNode *search = a->head->next;
+        int found = 0;
+        while (search != a->head)
+        {
+            if (cmp(search->data, cur->data))
+            {
+                found = 1;
+                break;
+            }
+            search = search->next;
+        }
+        if (!found)
+            return 0;
+        cur = cur->next;
+    }
+    return 1;
+}
+
 Set *set_teardown(Set *set)
 {
     if (set == NULL)
