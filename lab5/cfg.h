@@ -16,6 +16,8 @@ typedef struct CFGnode
 
     // 判断该节点是不是死代码
     int dead;
+    // 判断可达与否
+    int visited;
 
     enum
     {

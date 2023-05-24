@@ -31,7 +31,7 @@ static int cpfact_equal(void *a, void *b)
     return 0;
 }
 
-static init(const CFG *cfg)
+static void init(const CFG *cfg)
 {
     cfg->entry_node->in_fact = set_create();
     cfg->entry_node->out_fact = set_create();
@@ -98,7 +98,7 @@ static void meet_into(Set *fact, Set *target_fact)
         if (target_cpfact != NULL)
         {
             Value val = meet_value(cpfact->val, target_cpfact->val);
-            assert(val.type == UNDEF);
+            assert(val.type != UNDEF);
             target_cpfact->val = val;
         }
         // 无
@@ -159,6 +159,24 @@ static int compute(int type, int a, int b)
     case DIV:
         ans = a / b;
         break;
+    case EQ:
+        ans = a == b;
+        break;
+    case NE:
+        ans = a != b;
+        break;
+    case LT:
+        ans = a < b;
+        break;
+    case GT:
+        ans = a > b;
+        break;
+    case LE:
+        ans = a <= b;
+        break;
+    case GE:
+        ans = a >= b;
+        break;
     default:
         assert(0);
         break;
@@ -196,12 +214,13 @@ static Value evaluate_binary(IR *stmt, Set *infact)
         temp.op = stmt->binary_ir.right2;
         CPFact *search = (CPFact *)set_contains(infact, &temp, cpfact_equal);
         if (search == NULL)
+        {
             right.type = UNDEF;
+        }
         else
             right = search->val;
     }
-
-        if (left.type == UNDEF || right.type == UNDEF)
+    if (left.type == UNDEF || right.type == UNDEF)
         ans.type = UNDEF;
     else if (left.type == CONSTANT && right.type == CONSTANT)
     {
@@ -246,10 +265,15 @@ static int transfer_node(CFGnode *cfgnode)
     Set *outfact = set_copy(infact);
 
     IR *stmt = cfgnode->stmt;
-    // 特殊处理param
+    // 特殊处理param和dec
     if (stmt->type == PARAM_IR)
     {
         CPFact *cpfact = cpfact_create(stmt->param_ir.param_var, NAC, 0);
+        outfact = set_add(outfact, cpfact);
+    }
+    else if (stmt->type == DEC_IR)
+    {
+        CPFact *cpfact = cpfact_create(stmt->dec_ir.var, NAC, 0);
         outfact = set_add(outfact, cpfact);
     }
 
@@ -295,8 +319,8 @@ static int transfer_node(CFGnode *cfgnode)
                 outfact = set_add(outfact, gen);
             else
             {
-                search->val = value;
-                free(gen);
+                outfact = set_sub_data(outfact, search, cpfact_equal);
+                outfact = set_add(outfact, gen);
             }
         }
     }
@@ -360,6 +384,227 @@ static void fact_teardown(CFG *cfg)
     }
 }
 
+static void constant_folding(CFG *cfg)
+{
+    for (ListNode *cur = cfg->cfgnode_list->next; cur != cfg->cfgnode_list; cur = cur->next)
+    {
+        CFGnode *cfgnode = (CFGnode *)cur->data;
+
+        IR *stmt = cfgnode->stmt;
+        Set *outfact = cfgnode->out_fact;
+        Operand *left = NULL;
+
+        // 左值常量折叠
+        if (stmt->type == ASSIGN_IR)
+        {
+            left = stmt->assign_ir.left;
+            CPFact temp;
+            temp.op = left;
+            CPFact *search = set_contains(outfact, &temp, cpfact_equal);
+            if (search != NULL && search->val.type == CONSTANT)
+                stmt->assign_ir.right = operand_imm_create(search->val.val);
+        }
+        else if (stmt->type == BINARY_IR)
+        {
+            left = stmt->binary_ir.left;
+            CPFact temp;
+            temp.op = left;
+            CPFact *search = set_contains(outfact, &temp, cpfact_equal);
+            if (search != NULL && search->val.type == CONSTANT)
+            {
+                IR *ir = ir_create(ASSIGN_IR);
+                ir->index = stmt->index;
+                ir->assign_ir.left = left;
+                ir->assign_ir.right = operand_imm_create(search->val.val);
+                free(stmt);
+                cfgnode->stmt = ir;
+            }
+        }
+    }
+
+    for (ListNode *cur = cfg->cfgnode_list->next; cur != cfg->cfgnode_list; cur = cur->next)
+    {
+        CFGnode *cfgnode = (CFGnode *)cur->data;
+
+        IR *stmt = cfgnode->stmt;
+        Set *outfact = cfgnode->out_fact;
+
+        // 右值常量折叠
+        // assign右值常量已在上文被处理
+
+        if (stmt->type == BINARY_IR)
+        {
+            Operand *right1 = stmt->binary_ir.right1;
+            int flag = 0;
+            if (right1->type == VAR_OP)
+            {
+                CPFact temp;
+                temp.op = right1;
+                CPFact *search = set_contains(outfact, &temp, cpfact_equal);
+                if (search != NULL && search->val.type == CONSTANT)
+                {
+                    stmt->binary_ir.right1 = operand_imm_create(search->val.val);
+                    flag = 1;
+                }
+            }
+            Operand *right2 = stmt->binary_ir.right2;
+            if (right2->type == VAR_OP)
+            {
+                CPFact temp;
+                temp.op = right2;
+                CPFact *search = set_contains(outfact, &temp, cpfact_equal);
+                if (search != NULL && search->val.type == CONSTANT)
+                {
+                    printf("fuckkkk %d\n", stmt->index);
+                    stmt->binary_ir.right2 = operand_imm_create(search->val.val);
+                    flag = 1;
+                }
+            }
+            if (flag == 1)
+                stmt->binary_ir.exp = exp_create_by_type(stmt->binary_ir.exp->type, stmt->binary_ir.right1, stmt->binary_ir.right2);
+        }
+        else if (stmt->type == RETURN_IR)
+        {
+            Operand *right = stmt->return_ir.return_var;
+            if (right->type == VAR_OP)
+            {
+                CPFact temp;
+                temp.op = right;
+                CPFact *search = set_contains(outfact, &temp, cpfact_equal);
+                if (search != NULL && search->val.type == CONSTANT)
+                    stmt->return_ir.return_var = operand_imm_create(search->val.val);
+            }
+        }
+        else if (stmt->type == ARG_IR)
+        {
+            Operand *right = stmt->arg_ir.arg_var;
+            if (right->type == VAR_OP)
+            {
+                CPFact temp;
+                temp.op = right;
+                CPFact *search = set_contains(outfact, &temp, cpfact_equal);
+                if (search != NULL && search->val.type == CONSTANT)
+                    stmt->arg_ir.arg_var = operand_imm_create(search->val.val);
+            }
+        }
+        else if (stmt->type == WRITE_IR)
+        {
+            Operand *right = stmt->write_ir.write_var;
+            if (right->type == VAR_OP)
+            {
+                CPFact temp;
+                temp.op = right;
+                CPFact *search = set_contains(outfact, &temp, cpfact_equal);
+                if (search != NULL && search->val.type == CONSTANT)
+                    stmt->write_ir.write_var = operand_imm_create(search->val.val);
+            }
+        }
+        else if (stmt->type == CONDITIONAL_GOTO_IR)
+        {
+            Operand *left = stmt->conditional_goto_ir.left;
+            Operand *right = stmt->conditional_goto_ir.right;
+            if (left->type == VAR_OP)
+            {
+                CPFact temp;
+                temp.op = left;
+                CPFact *search = set_contains(outfact, &temp, cpfact_equal);
+                if (search != NULL && search->val.type == CONSTANT)
+                    stmt->conditional_goto_ir.left = operand_imm_create(search->val.val);
+            }
+            if (right->type == VAR_OP)
+            {
+                CPFact temp;
+                temp.op = right;
+                CPFact *search = set_contains(outfact, &temp, cpfact_equal);
+                if (search != NULL && search->val.type == CONSTANT)
+                    stmt->conditional_goto_ir.right = operand_imm_create(search->val.val);
+            }
+        }
+    }
+}
+
+static Value get_value(Operand *op, Set *fact)
+{
+    Value value;
+    if (op->type == IMMEDIATE_OP)
+    {
+        value.type = CONSTANT;
+        value.val = op->val;
+        return value;
+    }
+    CPFact temp;
+    temp.op = op;
+    CPFact *search = set_contains(fact, &temp, cpfact_equal);
+    if (search == NULL)
+        value.type = UNDEF;
+    else
+    {
+        value = search->val;
+    }
+    return value;
+}
+
+// 遍历，通过常量传播的数据找出不可达代码段，可达代码段定义为visited
+static void dead_code_elimination(CFG *cfg)
+{
+    Queue *worklist = queue_create();
+
+    queue_push(worklist, cfg->entry_node);
+
+    while (!queue_empty(worklist))
+    {
+        CFGnode *cfgnode = (CFGnode *)queue_pop(worklist);
+        if (cfgnode->visited == 1)
+            continue;
+        cfgnode->visited = 1;
+        IR *stmt = cfgnode->stmt;
+        if (cfgnode->type != NORMAL || stmt->type != CONDITIONAL_GOTO_IR)
+        {
+            for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
+            {
+                CFGnode *succ_cfgnode = (CFGnode *)succ->data;
+                if (succ_cfgnode->visited == 0)
+                    queue_push(worklist, succ_cfgnode);
+            }
+        }
+        else
+        {
+            Set *outfact = cfgnode->out_fact;
+            IR *stmt = cfgnode->stmt;
+            Operand *left = stmt->conditional_goto_ir.left;
+            Operand *right = stmt->conditional_goto_ir.right;
+            Value left_val = get_value(left, outfact);
+            Value right_val = get_value(right, outfact);
+            if (left_val.type == CONSTANT && right_val.type == CONSTANT)
+            {
+                int ans = compute(stmt->conditional_goto_ir.type, left_val.val, right_val.val);
+                for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
+                {
+                    CFGnode *succ_cfgnode = (CFGnode *)succ->data;
+                    IR *succ_stmt = succ_cfgnode->stmt;
+                    // 条件永为假
+                    if (ans == 0)
+                    {
+                        if (succ_stmt->type != LABEL_IR ||
+                            (succ_stmt->type == LABEL_IR &&
+                             strcmp(succ_stmt->label_ir.label_name, stmt->conditional_goto_ir.label_name) != 0))
+                            queue_push(worklist, succ_cfgnode);
+                    }
+                    // 条件永为真
+                    else
+                    {
+                        if (succ_stmt->type == LABEL_IR &&
+                            strcmp(succ_stmt->label_ir.label_name, stmt->conditional_goto_ir.label_name) == 0)
+                            queue_push(worklist, succ_cfgnode);
+                    }
+                }
+            }
+        }
+    }
+
+    queue_teardown(worklist);
+}
+
 void constant_propagation_analysis()
 {
     for (ListNode *cfg_node = cfgs_list_head->next; cfg_node != cfgs_list_head; cfg_node = cfg_node->next)
@@ -368,7 +613,8 @@ void constant_propagation_analysis()
         init(cfg);
         solver(cfg);
         // print_cfg_fact(cfg);
-
+        constant_folding(cfg);
+        dead_code_elimination(cfg);
         fact_teardown(cfg);
     }
 }

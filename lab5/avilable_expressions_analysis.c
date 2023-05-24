@@ -54,7 +54,8 @@ static int transfer_node(CFGnode *cfgnode)
         return 1;
     if (cfgnode->type == EXIT)
         return 0;
-
+    if (cfgnode->visited == 0)
+        return 0;
     // 计算 infact
     ListNode *pre_node = cfgnode->predecessors->next;
     assert(pre_node != cfgnode->predecessors);

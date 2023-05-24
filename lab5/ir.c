@@ -75,28 +75,8 @@ static Exp *is_exp_exist(int type, Operand *left, Operand *right)
     return NULL;
 }
 
-static Exp *exp_create(char *text, Operand *left, Operand *right)
+Exp *exp_create_by_type(int type, Operand *left, Operand *right)
 {
-    int type = 0;
-    switch (text[0])
-    {
-    case '+':
-        type = ADD;
-        break;
-    case '-':
-        type = SUB;
-        break;
-    case '*':
-        type = MUL;
-        break;
-    case '/':
-        type = DIV;
-        break;
-    default:
-        assert(0);
-        break;
-    }
-
     Exp *exp = is_exp_exist(type, left, right);
     if (exp == NULL)
     {
@@ -125,6 +105,31 @@ static Exp *exp_create(char *text, Operand *left, Operand *right)
     return exp;
 }
 
+static Exp *exp_create(char *text, Operand *left, Operand *right)
+{
+    int type = 0;
+    switch (text[0])
+    {
+    case '+':
+        type = ADD;
+        break;
+    case '-':
+        type = SUB;
+        break;
+    case '*':
+        type = MUL;
+        break;
+    case '/':
+        type = DIV;
+        break;
+    default:
+        assert(0);
+        break;
+    }
+
+    return exp_create_by_type(type, left, right);
+}
+
 void ir_extract(FILE *file)
 {
     char buf[1024];
@@ -132,7 +137,10 @@ void ir_extract(FILE *file)
 
     while (fgets(buf, sizeof(buf), file) != NULL)
     {
-        static int index = 1;
+        static int index = 0;
+        index++;
+        if (buf[0] == '\n')
+            continue;
         if (buf[strlen(buf) - 1] == '\n')
         {
             buf[strlen(buf) - 1] = '\0';
@@ -145,7 +153,6 @@ void ir_extract(FILE *file)
         ir->is_leader = 0;
         ir->cfg_node = NULL;
         ir->index = index;
-        index++;
 
         if (strcmp(params[0], "FUNCTION") == 0)
         {
@@ -176,6 +183,20 @@ void ir_extract(FILE *file)
             strcpy(ir->conditional_goto_ir.label_name, params[5]);
             ir->conditional_goto_ir.relop = (char *)malloc(strlen(params[2]) + 1);
             strcpy(ir->conditional_goto_ir.relop, params[2]);
+            if (strcmp(ir->conditional_goto_ir.relop, "==") == 0)
+                ir->conditional_goto_ir.type = EQ;
+            else if (strcmp(ir->conditional_goto_ir.relop, "!=") == 0)
+                ir->conditional_goto_ir.type = NE;
+            else if (strcmp(ir->conditional_goto_ir.relop, "<") == 0)
+                ir->conditional_goto_ir.type = LT;
+            else if (strcmp(ir->conditional_goto_ir.relop, ">") == 0)
+                ir->conditional_goto_ir.type = GT;
+            else if (strcmp(ir->conditional_goto_ir.relop, "<=") == 0)
+                ir->conditional_goto_ir.type = LE;
+            else if (strcmp(ir->conditional_goto_ir.relop, ">=") == 0)
+                ir->conditional_goto_ir.type = GE;
+            else
+                assert(0);
             ir->conditional_goto_ir.left = operand_create(params[1]);
             ir->conditional_goto_ir.right = operand_create(params[3]);
         }
@@ -232,6 +253,8 @@ void ir_extract(FILE *file)
             ir->assign_ir.left = operand_create(params[0]);
             ir->assign_ir.right = operand_create(params[2]);
         }
+        else
+            continue;
 
         ListNode *ir_node = listnode_create(ir);
         head = list_append(head, ir_node);

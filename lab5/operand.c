@@ -99,3 +99,10 @@ Operand *operand_exp_create()
     op->val = 0;
     return op;
 }
+
+Operand *operand_imm_create(int num)
+{
+    char text[20];
+    sprintf(text, "#%d", num);
+    return operand_create(text);
+}

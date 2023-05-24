@@ -35,4 +35,6 @@ void sprintf_op(char *addr, Operand *op);
 
 Operand *operand_exp_create();
 
+Operand *operand_imm_create(int num);
+
 #endif

@@ -16,7 +16,19 @@ typedef struct Exp
         ADD = 1,
         SUB,
         MUL,
-        DIV
+        DIV,
+        //==
+        EQ,
+        //!=
+        NE,
+        //<
+        LT,
+        //>
+        GT,
+        //<=
+        LE,
+        //>=
+        GE,
     } type;
 } Exp;
 
@@ -77,6 +89,7 @@ typedef struct IR
             Operand *left, *right;
             char *label_name;
             char *relop;
+            int type;
         } conditional_goto_ir;
         struct
         {
@@ -118,6 +131,8 @@ void ir_init();
 IR *ir_create(int type);
 
 void fprintf_ir(FILE *file, IR *ir);
+
+Exp *exp_create_by_type(int type, Operand *left, Operand *right);
 
 extern ListNode *label_list_head;
 
