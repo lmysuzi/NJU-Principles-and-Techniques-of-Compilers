@@ -82,9 +82,7 @@ static CFG *cfg_build(ListNode *ir_list)
             last_cfg_node = cur_cfg_node;
             break;
         }
-        printf("%d ", ir->type);
     }
-    printf("\n");
 
     for (ListNode *cur = ir_list->next; cur != ir_list; cur = cur->next)
     {

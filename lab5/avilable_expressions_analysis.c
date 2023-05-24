@@ -112,8 +112,7 @@ static int transfer_node(CFGnode *cfgnode)
     cfgnode->in_fact = infact;
     cfgnode->out_fact = set_teardown(cfgnode->out_fact);
     cfgnode->out_fact = outfact;
-    print_fact(cfgnode);
-    printf("exit with %d\n", changed);
+
     return changed;
 }
 

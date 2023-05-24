@@ -177,9 +177,6 @@ static int compute(int type, int a, int b)
     case GE:
         ans = a >= b;
         break;
-    default:
-        assert(0);
-        break;
     }
     return ans;
 }
@@ -239,8 +236,6 @@ static Value evaluate_binary(IR *stmt, Set *infact)
         else
             ans.type = NAC;
     }
-    else
-        assert(0);
 
     return ans;
 }
@@ -332,7 +327,6 @@ static int transfer_node(CFGnode *cfgnode)
     cfgnode->in_fact = set_teardown(cfgnode->in_fact);
     cfgnode->in_fact = infact;
 
-    print_fact(cfgnode);
     return changed;
 }
 
