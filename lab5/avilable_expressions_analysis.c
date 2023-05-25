@@ -83,7 +83,7 @@ static int transfer_node(CFGnode *cfgnode)
         left_var = stmt->binary_ir.left;
     }
 
-    if (left_var != NULL)
+    if (left_var != NULL && left_var->type == VAR_OP)
         for (ListNode *exp_node = left_var->attached_exp->next; exp_node != left_var->attached_exp; exp_node = exp_node->next)
         {
             Exp *exp = (Exp *)exp_node->data;
@@ -91,7 +91,7 @@ static int transfer_node(CFGnode *cfgnode)
         }
 
     // 处理带表达式的语句
-    if (stmt->type == BINARY_IR)
+    if (stmt->type == BINARY_IR && stmt->binary_ir.left->type == VAR_OP)
     {
         Exp *exp = stmt->binary_ir.exp;
         if (set_contains(outfact, exp, exp_equal) != NULL)

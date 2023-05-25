@@ -24,6 +24,8 @@ typedef struct Operand
         VAR_OP,
         // exp表示该变量代表一个表达式，用于消除公共表达式
         EXP,
+        // 数组或者结构体，不进行处理
+        DEC_OP,
     } type;
 } Operand;
 

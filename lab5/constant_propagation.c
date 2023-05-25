@@ -278,14 +278,9 @@ static int transfer_node(CFGnode *cfgnode)
 
     IR *stmt = cfgnode->stmt;
     // 特殊处理param和dec
-    if (stmt->type == PARAM_IR)
+    if (stmt->type == PARAM_IR && stmt->param_ir.param_var->type == VAR_OP)
     {
         CPFact *cpfact = cpfact_create(stmt->param_ir.param_var, NAC, 0);
-        outfact = set_add(outfact, cpfact);
-    }
-    else if (stmt->type == DEC_IR)
-    {
-        CPFact *cpfact = cpfact_create(stmt->dec_ir.var, NAC, 0);
         outfact = set_add(outfact, cpfact);
     }
 
@@ -402,7 +397,7 @@ static void constant_folding(CFG *cfg)
         Operand *left = NULL;
 
         // 左值常量折叠
-        if (stmt->type == ASSIGN_IR)
+        if (stmt->type == ASSIGN_IR && stmt->assign_ir.left->type == VAR_OP)
         {
             left = stmt->assign_ir.left;
             CPFact temp;
@@ -411,7 +406,7 @@ static void constant_folding(CFG *cfg)
             if (search != NULL && search->val.type == CONSTANT)
                 stmt->assign_ir.right = operand_imm_create(search->val.val);
         }
-        else if (stmt->type == BINARY_IR)
+        else if (stmt->type == BINARY_IR && stmt->binary_ir.left->type == VAR_OP)
         {
             left = stmt->binary_ir.left;
             CPFact temp;

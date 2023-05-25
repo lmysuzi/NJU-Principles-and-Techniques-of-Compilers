@@ -1,5 +1,7 @@
 FUNCTION main :
 DEC vararr 40
+temp3 := #0
+varresult := temp3
 temp4 := #0
 vari_cnt := temp4
 LABEL label0 :
@@ -7,9 +9,11 @@ temp5 := vari_cnt
 IF temp5 < #10 GOTO label1
 GOTO label2
 LABEL label1 :
+temp7 := #0
 temp9 := vari_cnt
-exp_1 := temp9 * #4
-temp8 := exp_1
+temp8 := temp9 * #4
+temp10 := &vararr + temp8
+*temp10 := temp7
 temp12 := vari_cnt
 exp_25 := temp12 + #1
 temp11 := exp_25
@@ -67,29 +71,28 @@ IF temp42 < #10 GOTO label11
 GOTO label12
 LABEL label11 :
 temp52 := vari_cnt
-exp_12 := temp52 * #4
-temp51 := exp_12
+temp51 := temp52 * #4
+temp53 := &vararr + temp51
 temp49 := *temp53
-exp_32 := temp49 / #2
-temp47 := exp_32
+temp50 := #2
+temp47 := temp49 / temp50
 temp48 := vari
-exp_15 := temp47 + temp48
-temp45 := exp_15
+temp45 := temp47 + temp48
 temp46 := varj
-exp_16 := temp45 - temp46
-temp44 := exp_16
+temp44 := temp45 - temp46
 temp55 := vari_cnt
-exp_17 := temp55 * #4
-temp54 := exp_17
+temp54 := temp55 * #4
+temp56 := &vararr + temp54
+*temp56 := temp44
 temp58 := vari_cnt
-exp_33 := temp58 + #1
-temp57 := exp_33
+exp_32 := temp58 + #1
+temp57 := exp_32
 vari_cnt := temp57
 GOTO label10
 LABEL label12 :
 temp61 := varo_cnt
-exp_34 := temp61 + #1
-temp60 := exp_34
+exp_33 := temp61 + #1
+temp60 := exp_33
 varo_cnt := temp60
 GOTO label3
 LABEL label5 :
@@ -100,18 +103,20 @@ temp64 := vari_cnt
 IF temp64 < #10 GOTO label14
 GOTO label15
 LABEL label14 :
+temp67 := varresult
 temp70 := vari_cnt
-exp_21 := temp70 * #4
-temp69 := exp_21
+temp69 := temp70 * #4
+temp71 := &vararr + temp69
 temp68 := *temp71
-exp_35 := #0 + temp68
-temp66 := exp_35
+temp66 := temp67 + temp68
+varresult := temp66
 temp73 := vari_cnt
-exp_36 := temp73 + #1
-temp72 := exp_36
+exp_34 := temp73 + #1
+temp72 := exp_34
 vari_cnt := temp72
 GOTO label13
 LABEL label15 :
-WRITE #0
+temp76 := varresult
+WRITE temp76
 RETURN #0
 

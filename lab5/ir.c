@@ -98,8 +98,11 @@ Exp *exp_create_by_type(int type, Operand *left, Operand *right)
             ListNode *right_node = listnode_create(exp);
             right->attached_exp = list_append(right->attached_exp, right_node);
         }
-        ListNode *node = listnode_create(exp);
-        exp_list_head = list_append(exp_list_head, node);
+        if (left->type == VAR_OP && right->type == VAR_OP)
+        {
+            ListNode *node = listnode_create(exp);
+            exp_list_head = list_append(exp_list_head, node);
+        }
     }
 
     return exp;
@@ -209,6 +212,7 @@ void ir_extract(FILE *file)
         {
             ir->type = DEC_IR;
             ir->dec_ir.var = operand_create(params[1]);
+            ir->dec_ir.var->type = DEC_OP;
             sscanf(params[2], "%d", &(ir->dec_ir.size));
         }
         else if (strcmp(params[0], "ARG") == 0)
@@ -244,6 +248,10 @@ void ir_extract(FILE *file)
             ir->binary_ir.left = operand_create(params[0]);
             ir->binary_ir.right1 = operand_create(params[2]);
             ir->binary_ir.right2 = operand_create(params[4]);
+            if (ir->binary_ir.right2->type == DEC_OP || ir->binary_ir.right1->type == DEC_OP)
+                ir->binary_ir.left->type = DEC_OP;
+            if (ir->binary_ir.left->type == DEC_OP)
+                ir->binary_ir.right1->type = ir->binary_ir.right2->type = DEC_OP;
             ir->binary_ir.exp = exp_create(params[3], ir->binary_ir.right1, ir->binary_ir.right2);
             ir->binary_ir.exp_var = NULL;
         }
@@ -252,6 +260,10 @@ void ir_extract(FILE *file)
             ir->type = ASSIGN_IR;
             ir->assign_ir.left = operand_create(params[0]);
             ir->assign_ir.right = operand_create(params[2]);
+            if (ir->assign_ir.right->type == DEC_OP)
+                ir->assign_ir.left->type = DEC_OP;
+            if (ir->assign_ir.left->type == DEC_OP)
+                ir->assign_ir.right->type = DEC_OP;
         }
         else
             continue;

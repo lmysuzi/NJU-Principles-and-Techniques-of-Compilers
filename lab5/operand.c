@@ -61,10 +61,10 @@ Operand *operand_create(char *text)
     {
         char *name = (char *)malloc(strlen(text) + 1);
         int index = 0;
-        /*
+
         if (text[0] == '&' || text[0] == '*')
             index++;
-        */
+
         strcpy(name, text + index);
 
         ListNode *node = list_search_by_key(var_list, operand_listnode_cmp, name);
@@ -82,6 +82,14 @@ Operand *operand_create(char *text)
         else
         {
             op = (Operand *)node->data;
+            if (op->type == DEC_OP)
+            {
+                op = (Operand *)malloc(sizeof(Operand));
+                op->type = DEC_OP;
+                strcpy(name, text);
+                op->name = name;
+                op->attached_exp = list_create();
+            }
         }
     }
     return op;
