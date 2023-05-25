@@ -1,103 +1,231 @@
-FUNCTION main :
-DEC vararr1 40
-DEC vararr2 40
-temp1 := #0
-varresult := temp1
-READ temp2
-vari := temp2
-varcnt := #0
+FUNCTION dot :
+PARAM vardp1
+PARAM vardp2
+temp7 := #0
+temp8 := vardp1 + temp7
+temp5 := *temp8
+temp9 := #0
+temp10 := vardp2 + temp9
+temp6 := *temp10
+temp3 := temp5 * temp6
+temp13 := #4
+temp14 := vardp1 + temp13
+temp11 := *temp14
+temp15 := #4
+temp16 := vardp2 + temp15
+temp12 := *temp16
+temp4 := temp11 * temp12
+temp1 := temp3 + temp4
+temp19 := #8
+temp20 := vardp1 + temp19
+temp17 := *temp20
+temp21 := #8
+temp22 := vardp2 + temp21
+temp18 := *temp22
+temp2 := temp17 * temp18
+temp0 := temp1 + temp2
+RETURN temp0
+
+FUNCTION sqrt :
+PARAM varsi
+vars_cnt := #0
 LABEL label0 :
-temp4 := varcnt
-IF temp4 < #10 GOTO label1
+temp24 := vars_cnt
+temp25 := varsi
+IF temp24 <= temp25 GOTO label1
 GOTO label2
 LABEL label1 :
-temp7 := vari
-temp8 := varcnt
-temp6 := temp7 + temp8
-temp10 := varcnt
-temp9 := temp10 * #4
-temp11 := &vararr1 + temp9
-*temp11 := temp6
-temp13 := varcnt
-exp_28 := temp13 + #1
-temp12 := exp_28
-varcnt := temp12
-GOTO label0
-LABEL label2 :
-temp15 := #2
-temp16 := #0 * #4
-temp18 := &vararr2 + temp16
-*temp18 := temp15
-varcnt := #1
-LABEL label3 :
-temp20 := varcnt
-IF temp20 < #10 GOTO label4
-GOTO label5
-LABEL label4 :
-temp26 := varcnt
-temp25 := temp26 * #4
-temp27 := &vararr1 + temp25
-temp23 := *temp27
-temp33 := varcnt
-temp32 := temp33 * #4
-temp34 := &vararr1 + temp32
-temp30 := *temp34
-temp31 := #3
-temp28 := temp30 / temp31
-temp29 := #3
-temp24 := temp28 * temp29
-temp22 := temp23 - temp24
-vartmp := temp22
-temp35 := vartmp
-IF temp35 == #0 GOTO label6
+temp27 := vars_cnt
+temp28 := vars_cnt
+exp_12 := temp27 * temp28
+temp26 := exp_12
+varlower := temp26
+temp33 := vars_cnt
+exp_71 := temp33 + #1
+temp32 := exp_71
+temp30 := temp32
+temp36 := vars_cnt
+exp_72 := temp36 + #1
+temp35 := exp_72
+temp31 := temp35
+exp_15 := temp30 * temp31
+temp29 := exp_15
+varupper := temp29
+temp39 := #0
+temp40 := varsi
+temp41 := varlower
+IF temp40 >= temp41 GOTO label6
 GOTO label7
 LABEL label6 :
-temp39 := varcnt
-temp38 := temp39 * #4
-temp40 := &vararr1 + temp38
-temp37 := *temp40
-temp42 := varcnt
-temp41 := temp42 * #4
-temp43 := &vararr2 + temp41
-*temp43 := temp37
-GOTO label8
+temp39 := #1
 LABEL label7 :
-temp47 := varcnt
-temp46 := temp47 * #4
-temp48 := &vararr1 + temp46
-temp45 := *temp48
-temp44 := #0 - temp45
-temp50 := varcnt
-temp49 := temp50 * #4
-temp51 := &vararr2 + temp49
-*temp51 := temp44
-LABEL label8 :
-temp53 := varcnt
-exp_30 := temp53 + #1
-temp52 := exp_30
-varcnt := temp52
-GOTO label3
+temp38 := temp39
+IF temp38 != #0 GOTO label5
+GOTO label4
 LABEL label5 :
-varcnt := #0
-LABEL label9 :
-temp56 := varcnt
-IF temp56 < #10 GOTO label10
-GOTO label11
-LABEL label10 :
-temp59 := varresult
-temp62 := varcnt
-temp61 := temp62 * #4
-temp63 := &vararr2 + temp61
-temp60 := *temp63
-temp58 := temp59 + temp60
-varresult := temp58
-temp65 := varcnt
-exp_31 := temp65 + #1
-temp64 := exp_31
-varcnt := temp64
+temp43 := #0
+temp44 := varsi
+temp45 := varupper
+IF temp44 < temp45 GOTO label8
 GOTO label9
+LABEL label8 :
+temp43 := #1
+LABEL label9 :
+temp42 := temp43
+IF temp42 != #0 GOTO label3
+GOTO label4
+LABEL label3 :
+temp46 := vars_cnt
+RETURN temp46
+LABEL label4 :
+temp48 := vars_cnt
+exp_73 := temp48 + #1
+temp47 := exp_73
+vars_cnt := temp47
+GOTO label0
+LABEL label2 :
+RETURN #-1
+
+FUNCTION dist :
+PARAM vardip1
+PARAM vardip2
+temp54 := vardip1
+temp55 := vardip2
+ARG temp55
+ARG temp54
+temp53 := CALL dot
+ARG temp53
+temp52 := CALL sqrt
+RETURN temp52
+
+FUNCTION main :
+DEC varbodies 120
+varo_cnt := #0
+LABEL label10 :
+temp58 := varo_cnt
+IF temp58 < #3 GOTO label11
+GOTO label12
 LABEL label11 :
-temp68 := varresult
-WRITE temp68
+vari_cnt := #0
+LABEL label13 :
+temp61 := vari_cnt
+IF temp61 < #3 GOTO label14
+GOTO label15
+LABEL label14 :
+temp66 := vari_cnt
+temp67 := varo_cnt
+exp_18 := temp66 * temp67
+temp64 := exp_18
+temp65 := vari_cnt
+temp63 := temp64 + temp65
+temp69 := varo_cnt
+exp_20 := temp69 * #40
+temp68 := exp_20
+exp_21 := temp68 + #4
+temp70 := exp_21
+temp72 := vari_cnt
+exp_22 := temp72 * #12
+temp73 := exp_22
+exp_23 := temp70 + temp73
+temp71 := exp_23
+temp74 := temp71 + #0
+temp75 := &varbodies + temp74
+*temp75 := temp63
+temp81 := vari_cnt
+temp82 := varo_cnt
+exp_26 := temp81 * temp82
+temp79 := exp_26
+temp80 := varo_cnt
+exp_27 := temp79 * temp80
+temp77 := exp_27
+temp78 := vari_cnt
+temp76 := temp77 + temp78
+temp84 := varo_cnt
+exp_29 := temp84 * #40
+temp83 := exp_29
+exp_30 := temp83 + #4
+temp85 := exp_30
+temp87 := vari_cnt
+exp_31 := temp87 * #12
+temp88 := exp_31
+exp_32 := temp85 + temp88
+temp86 := exp_32
+temp89 := temp86 + #4
+temp90 := &varbodies + temp89
+*temp90 := temp76
+temp98 := vari_cnt
+temp99 := vari_cnt
+exp_35 := temp98 * temp99
+temp96 := exp_35
+temp97 := varo_cnt
+exp_36 := temp96 * temp97
+temp94 := exp_36
+temp95 := varo_cnt
+exp_37 := temp94 * temp95
+temp92 := exp_37
+temp93 := vari_cnt
+temp91 := temp92 + temp93
+temp101 := varo_cnt
+exp_39 := temp101 * #40
+temp100 := exp_39
+exp_40 := temp100 + #4
+temp102 := exp_40
+temp104 := vari_cnt
+exp_41 := temp104 * #12
+temp105 := exp_41
+exp_42 := temp102 + temp105
+temp103 := exp_42
+temp106 := temp103 + #8
+temp107 := &varbodies + temp106
+*temp107 := temp91
+temp109 := vari_cnt
+exp_74 := temp109 + #1
+temp108 := exp_74
+vari_cnt := temp108
+GOTO label13
+LABEL label15 :
+temp114 := varo_cnt
+exp_46 := temp114 * #40
+temp113 := exp_46
+exp_47 := temp113 + #4
+temp115 := exp_47
+temp116 := temp115 + #12
+temp119 := varbodies + temp116
+temp112 := temp119
+temp122 := varo_cnt
+exp_51 := temp122 * #40
+temp121 := exp_51
+exp_52 := temp121 + #4
+temp123 := exp_52
+temp124 := temp123 + #24
+temp127 := varbodies + temp124
+temp120 := temp127
+ARG temp120
+ARG temp112
+temp111 := CALL dist
+temp129 := varo_cnt
+exp_56 := temp129 * #40
+temp128 := exp_56
+temp130 := temp128 + #0
+temp131 := &varbodies + temp130
+*temp131 := temp111
+temp133 := varo_cnt
+exp_77 := temp133 + #1
+temp132 := exp_77
+varo_cnt := temp132
+GOTO label10
+LABEL label12 :
+temp143 := #0 + #0
+temp144 := &varbodies + temp143
+temp139 := *temp144
+temp147 := #40 + #0
+temp148 := &varbodies + temp147
+temp140 := *temp148
+temp137 := temp139 + temp140
+temp151 := #80 + #0
+temp152 := &varbodies + temp151
+temp138 := *temp152
+temp136 := temp137 + temp138
+WRITE temp136
 RETURN #0
 

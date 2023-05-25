@@ -231,6 +231,7 @@ void ir_extract(FILE *file)
         {
             ir->type = PARAM_IR;
             ir->param_ir.param_var = operand_create(params[1]);
+            ir->param_ir.param_var->type = DEC_OP;
         }
         else if (strcmp(params[0], "READ") == 0)
         {
