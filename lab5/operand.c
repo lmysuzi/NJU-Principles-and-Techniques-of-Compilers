@@ -105,6 +105,7 @@ Operand *operand_exp_create()
     id++;
     op->type = EXP;
     op->val = 0;
+    op->used = 0;
     return op;
 }
 

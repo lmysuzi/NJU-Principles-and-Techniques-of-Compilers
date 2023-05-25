@@ -65,7 +65,10 @@ static Exp *is_exp_exist(int type, Operand *left, Operand *right)
         if (exp->type != type)
             continue;
         if (exp->left == left && exp->right == right)
+        {
             return exp;
+        }
+
         if (type == ADD || type == MUL)
         {
             if (exp->left == right && exp->right == left)
@@ -98,7 +101,7 @@ Exp *exp_create_by_type(int type, Operand *left, Operand *right)
             ListNode *right_node = listnode_create(exp);
             right->attached_exp = list_append(right->attached_exp, right_node);
         }
-        if (left->type == VAR_OP && right->type == VAR_OP)
+        if (left->type != DEC_OP || right->type != DEC_OP)
         {
             ListNode *node = listnode_create(exp);
             exp_list_head = list_append(exp_list_head, node);
@@ -304,7 +307,7 @@ void fprintf_ir(FILE *file, IR *ir)
     case BINARY_IR:
         sprintf_op(left, ir->binary_ir.left);
         sprintf_exp(exp, ir->binary_ir.exp);
-        if (ir->binary_ir.exp_var != NULL)
+        if (ir->binary_ir.exp_var != NULL && ir->binary_ir.exp_var->used == 1)
         {
             sprintf_op(op, ir->binary_ir.exp_var);
             fprintf(file, "%s := %s\n", op, exp);
@@ -350,7 +353,6 @@ void fprintf_ir(FILE *file, IR *ir)
         fprintf(file, "WRITE %s\n", op);
         break;
     default:
-        assert(0);
         break;
     }
 }

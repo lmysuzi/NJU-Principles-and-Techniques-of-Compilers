@@ -17,6 +17,9 @@ typedef struct Operand
     // 该操作数所对应的DAG节点
     // DAGnode *dag_node;
 
+    // 用于标记表达式是否用过
+    int used;
+
     enum
     {
         // 常数

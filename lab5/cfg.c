@@ -120,6 +120,5 @@ void cfgs_output(FILE *file)
             if (cfgnode->dead == 0 && cfgnode->visited == 1)
                 fprintf_ir(file, cfgnode->stmt);
         }
-        fprintf(file, "\n");
     }
 }

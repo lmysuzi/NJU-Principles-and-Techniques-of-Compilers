@@ -112,7 +112,7 @@ static int transfer_node(CFGnode *cfgnode)
     cfgnode->in_fact = infact;
     cfgnode->out_fact = set_teardown(cfgnode->out_fact);
     cfgnode->out_fact = outfact;
-
+    // print_fact(cfgnode);
     return changed;
 }
 
@@ -165,7 +165,7 @@ static void print_fact(CFGnode *cfgnode)
     for (ListNode *cur = outfact->head->next; cur != outfact->head; cur = cur->next)
     {
         Exp *exp = (Exp *)cur->data;
-        printf("exp %s %d %s ", exp->left->name, exp->type, exp->right->name);
+        printf("exp %s %d %s ", exp->left->name, exp->right->val, exp->right->name);
     }
     printf("\n");
 }
@@ -194,6 +194,8 @@ static ListNode *common_subexpression_elimination(CFG *cfg)
             if (search != NULL)
             {
                 // 若该语句的infact中含有其对应的表达式，说明该表达式为公共表达式，可以进行替换
+                search->exp_var->used = 1;
+
                 IR *new_stmt = ir_create(ASSIGN_IR);
                 new_stmt->assign_ir.left = cfgnode->stmt->binary_ir.left;
                 new_stmt->assign_ir.right = search->exp_var;
