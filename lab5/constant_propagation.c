@@ -31,6 +31,17 @@ static int cpfact_equal(void *a, void *b)
     return 0;
 }
 
+static CPFact *cpfact_create(Operand *op, int type, int val)
+{
+    CPFact *cpfact = (CPFact *)malloc(sizeof(CPFact));
+    Value value;
+    value.type = type;
+    value.val = val;
+    cpfact->val = value;
+    cpfact->op = op;
+    return cpfact;
+}
+
 static void init(const CFG *cfg)
 {
     cfg->entry_node->in_fact = set_create();
@@ -98,8 +109,12 @@ static void meet_into(Set *fact, Set *target_fact)
         if (target_cpfact != NULL)
         {
             Value val = meet_value(cpfact->val, target_cpfact->val);
-            assert(val.type != UNDEF);
-            target_cpfact->val = val;
+            if (val.type != UNDEF)
+            {
+                CPFact *new_cpfact = cpfact_create(cpfact->op, val.type, val.val);
+                target_fact = set_sub_data(target_fact, target_cpfact, cpfact_equal);
+                target_fact = set_add(target_fact, new_cpfact);
+            }
         }
         // 无
         else
@@ -107,17 +122,6 @@ static void meet_into(Set *fact, Set *target_fact)
             target_fact = set_add(target_fact, cpfact);
         }
     }
-}
-
-static CPFact *cpfact_create(Operand *op, int type, int val)
-{
-    CPFact *cpfact = (CPFact *)malloc(sizeof(CPFact));
-    Value value;
-    value.type = type;
-    value.val = val;
-    cpfact->val = value;
-    cpfact->op = op;
-    return cpfact;
 }
 
 static Value evaluate_assign(IR *stmt, Set *infact)

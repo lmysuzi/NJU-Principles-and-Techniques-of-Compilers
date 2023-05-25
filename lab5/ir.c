@@ -251,7 +251,12 @@ void ir_extract(FILE *file)
             if (ir->binary_ir.right2->type == DEC_OP || ir->binary_ir.right1->type == DEC_OP)
                 ir->binary_ir.left->type = DEC_OP;
             if (ir->binary_ir.left->type == DEC_OP)
-                ir->binary_ir.right1->type = ir->binary_ir.right2->type = DEC_OP;
+            {
+                if (ir->binary_ir.right1->type != IMMEDIATE_OP)
+                    ir->binary_ir.right1->type = DEC_OP;
+                if (ir->binary_ir.right2->type != IMMEDIATE_OP)
+                    ir->binary_ir.right2->type = DEC_OP;
+            }
             ir->binary_ir.exp = exp_create(params[3], ir->binary_ir.right1, ir->binary_ir.right2);
             ir->binary_ir.exp_var = NULL;
         }
@@ -262,7 +267,7 @@ void ir_extract(FILE *file)
             ir->assign_ir.right = operand_create(params[2]);
             if (ir->assign_ir.right->type == DEC_OP)
                 ir->assign_ir.left->type = DEC_OP;
-            if (ir->assign_ir.left->type == DEC_OP)
+            if (ir->assign_ir.left->type == DEC_OP && ir->assign_ir.right->type != IMMEDIATE_OP)
                 ir->assign_ir.right->type = DEC_OP;
         }
         else

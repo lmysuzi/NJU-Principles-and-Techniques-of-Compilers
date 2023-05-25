@@ -1,122 +1,103 @@
 FUNCTION main :
-DEC vararr 40
-temp3 := #0
-varresult := temp3
-temp4 := #0
-vari_cnt := temp4
+DEC vararr1 40
+DEC vararr2 40
+temp1 := #0
+varresult := temp1
+READ temp2
+vari := temp2
+varcnt := #0
 LABEL label0 :
-temp5 := vari_cnt
-IF temp5 < #10 GOTO label1
+temp4 := varcnt
+IF temp4 < #10 GOTO label1
 GOTO label2
 LABEL label1 :
-temp7 := #0
-temp9 := vari_cnt
-temp8 := temp9 * #4
-temp10 := &vararr + temp8
-*temp10 := temp7
-temp12 := vari_cnt
-exp_25 := temp12 + #1
-temp11 := exp_25
-vari_cnt := temp11
+temp7 := vari
+temp8 := varcnt
+temp6 := temp7 + temp8
+temp10 := varcnt
+temp9 := temp10 * #4
+temp11 := &vararr1 + temp9
+*temp11 := temp6
+temp13 := varcnt
+exp_28 := temp13 + #1
+temp12 := exp_28
+varcnt := temp12
 GOTO label0
 LABEL label2 :
-temp14 := #0
-varo_cnt := temp14
+temp15 := #2
+temp16 := #0 * #4
+temp18 := &vararr2 + temp16
+*temp18 := temp15
+varcnt := #1
 LABEL label3 :
-temp15 := varo_cnt
-IF temp15 < #3 GOTO label4
+temp20 := varcnt
+IF temp20 < #10 GOTO label4
 GOTO label5
 LABEL label4 :
-READ temp17
-vari := temp17
-READ temp18
-varj := temp18
-temp19 := vari
-IF temp19 > #10 GOTO label6
+temp26 := varcnt
+temp25 := temp26 * #4
+temp27 := &vararr1 + temp25
+temp23 := *temp27
+temp33 := varcnt
+temp32 := temp33 * #4
+temp34 := &vararr1 + temp32
+temp30 := *temp34
+temp31 := #3
+temp28 := temp30 / temp31
+temp29 := #3
+temp24 := temp28 * temp29
+temp22 := temp23 - temp24
+vartmp := temp22
+temp35 := vartmp
+IF temp35 == #0 GOTO label6
 GOTO label7
 LABEL label6 :
-temp25 := vari
-exp_26 := #1 + temp25
-temp22 := exp_26
-temp28 := vari
-exp_27 := temp28 / #10
-temp26 := exp_27
-exp_28 := temp26 * #10
-temp23 := exp_28
-exp_7 := temp22 - temp23
-temp21 := exp_7
-vari := temp21
+temp39 := varcnt
+temp38 := temp39 * #4
+temp40 := &vararr1 + temp38
+temp37 := *temp40
+temp42 := varcnt
+temp41 := temp42 * #4
+temp43 := &vararr2 + temp41
+*temp43 := temp37
+GOTO label8
 LABEL label7 :
-temp30 := varj
-IF temp30 > #10 GOTO label8
-GOTO label9
+temp47 := varcnt
+temp46 := temp47 * #4
+temp48 := &vararr1 + temp46
+temp45 := *temp48
+temp44 := #0 - temp45
+temp50 := varcnt
+temp49 := temp50 * #4
+temp51 := &vararr2 + temp49
+*temp51 := temp44
 LABEL label8 :
-temp36 := varj
-exp_29 := #2 + temp36
-temp33 := exp_29
-temp39 := varj
-exp_30 := temp39 / #10
-temp37 := exp_30
-exp_31 := temp37 * #10
-temp34 := exp_31
-exp_11 := temp33 - temp34
-temp32 := exp_11
-varj := temp32
-LABEL label9 :
-temp41 := #0
-vari_cnt := temp41
-LABEL label10 :
-temp42 := vari_cnt
-IF temp42 < #10 GOTO label11
-GOTO label12
-LABEL label11 :
-temp52 := vari_cnt
-temp51 := temp52 * #4
-temp53 := &vararr + temp51
-temp49 := *temp53
-temp50 := #2
-temp47 := temp49 / temp50
-temp48 := vari
-temp45 := temp47 + temp48
-temp46 := varj
-temp44 := temp45 - temp46
-temp55 := vari_cnt
-temp54 := temp55 * #4
-temp56 := &vararr + temp54
-*temp56 := temp44
-temp58 := vari_cnt
-exp_32 := temp58 + #1
-temp57 := exp_32
-vari_cnt := temp57
-GOTO label10
-LABEL label12 :
-temp61 := varo_cnt
-exp_33 := temp61 + #1
-temp60 := exp_33
-varo_cnt := temp60
+temp53 := varcnt
+exp_30 := temp53 + #1
+temp52 := exp_30
+varcnt := temp52
 GOTO label3
 LABEL label5 :
-temp63 := #0
-vari_cnt := temp63
-LABEL label13 :
-temp64 := vari_cnt
-IF temp64 < #10 GOTO label14
-GOTO label15
-LABEL label14 :
-temp67 := varresult
-temp70 := vari_cnt
-temp69 := temp70 * #4
-temp71 := &vararr + temp69
-temp68 := *temp71
-temp66 := temp67 + temp68
-varresult := temp66
-temp73 := vari_cnt
-exp_34 := temp73 + #1
-temp72 := exp_34
-vari_cnt := temp72
-GOTO label13
-LABEL label15 :
-temp76 := varresult
-WRITE temp76
+varcnt := #0
+LABEL label9 :
+temp56 := varcnt
+IF temp56 < #10 GOTO label10
+GOTO label11
+LABEL label10 :
+temp59 := varresult
+temp62 := varcnt
+temp61 := temp62 * #4
+temp63 := &vararr2 + temp61
+temp60 := *temp63
+temp58 := temp59 + temp60
+varresult := temp58
+temp65 := varcnt
+exp_31 := temp65 + #1
+temp64 := exp_31
+varcnt := temp64
+GOTO label9
+LABEL label11 :
+temp68 := varresult
+WRITE temp68
 RETURN #0
 
