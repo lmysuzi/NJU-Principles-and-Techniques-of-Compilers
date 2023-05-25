@@ -565,14 +565,15 @@ static void dead_code_elimination(CFG *cfg)
         cfgnode->visited = 1;
         IR *stmt = cfgnode->stmt;
 
-        for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
-        {
-            CFGnode *succ_cfgnode = (CFGnode *)succ->data;
-            if (succ_cfgnode->visited == 0)
-                queue_push(worklist, succ_cfgnode);
-        }
+        if (cfgnode->stmt == NULL || cfgnode->stmt->type != CONDITIONAL_GOTO_IR)
+            for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
+            {
+                CFGnode *succ_cfgnode = (CFGnode *)succ->data;
+                if (succ_cfgnode->visited == 0)
+                    queue_push(worklist, succ_cfgnode);
+            }
 
-        /*else
+        else
         {
             Set *outfact = cfgnode->out_fact;
             IR *stmt = cfgnode->stmt;
@@ -603,9 +604,18 @@ static void dead_code_elimination(CFG *cfg)
                             queue_push(worklist, succ_cfgnode);
                     }
                 }
+                cfgnode->dead = 1;
+            }
+            else
+            {
+                for (ListNode *succ = cfgnode->successors->next; succ != cfgnode->successors; succ = succ->next)
+                {
+                    CFGnode *succ_cfgnode = (CFGnode *)succ->data;
+                    if (succ_cfgnode->visited == 0)
+                        queue_push(worklist, succ_cfgnode);
+                }
             }
         }
-        */
     }
 
     queue_teardown(worklist);

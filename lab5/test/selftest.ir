@@ -15,7 +15,9 @@ v7 := t6
 t7 := #2 * v3
 t8 := t7 + #4
 v9 := t8
-IF v9 == v7 GOTO label2
+v9 := #1
+v7 := #2
+IF v9 != v7 GOTO label2
 LABEL label1 :
 v3 := #3
 t9 := v4 + #5
